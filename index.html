@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Les Skapitaines — Airlines</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#05070f" />
+    <meta
+      name="description"
+      content="Shoot'em up vertical en pixel art. Trois vols, trois boss, et les cuivres à fond."
+    />
+
+    <!-- Aperçu des liens partagés (Discord, WhatsApp, Slack...). Ces clients
+         résolvent une URL relative, mais pas tous : une fois le domaine connu,
+         remplacer og:image par l'URL absolue (https://…/apercu.png) pour que
+         l'aperçu marche partout. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Les Skapitaines — Airlines" />
+    <meta
+      property="og:description"
+      content="Shoot'em up vertical en pixel art. Trois vols, trois boss, et les cuivres à fond."
+    />
+    <meta property="og:image" content="apercu.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #05070f;
+        overflow: hidden;
+      }
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      canvas {
+        image-rendering: pixelated;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="jeu"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges">
+  <rect width="32" height="32" fill="#0b1026"/>
+  <!-- Les ailes de la cocarde, réduites à l'essentiel : à 16px le détail
+       disparaît, seule la silhouette compte. -->
+  <rect x="2" y="14" width="8" height="4" fill="#9fe0ff"/>
+  <rect x="22" y="14" width="8" height="4" fill="#9fe0ff"/>
+  <rect x="4" y="12" width="4" height="2" fill="#9fe0ff"/>
+  <rect x="24" y="12" width="4" height="2" fill="#9fe0ff"/>
+  <circle cx="16" cy="16" r="8" fill="#f7d51d"/>
+  <circle cx="16" cy="16" r="3.5" fill="#0b1026"/>
+</svg>

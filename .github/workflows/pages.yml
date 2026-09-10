@@ -1,0 +1,53 @@
+# Déploiement sur GitHub Pages à chaque push sur main.
+#
+# Prérequis côté dépôt, à faire une fois : Settings > Pages > Source =
+# "GitHub Actions". Sans ça le job de déploiement échoue sur un droit manquant.
+name: Déployer sur GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # Permet de relancer un déploiement à la main depuis l'onglet Actions.
+  workflow_dispatch:
+
+# Les droits que réclame actions/deploy-pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un seul déploiement à la fois ; si on pousse deux fois de suite, la première
+# exécution est abandonnée plutôt que de se battre avec la seconde.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  construire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Vite 8 / Rolldown exigent Node 22 : en dessous le build casse sur une
+      # erreur qui ne parle pas de version (styleText absent de node:util).
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deployer:
+    needs: construire
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploiement.outputs.page_url }}
+    steps:
+      - id: deploiement
+        uses: actions/deploy-pages@v4

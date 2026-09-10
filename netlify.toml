@@ -1,0 +1,23 @@
+# Build statique : Netlify n'a qu'à lancer Vite et servir dist/.
+# Le base: './' de vite.config.js rend le bundle indifférent au chemin, il n'y
+# a donc rien à configurer côté redirections.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  # Vite 8 / Rolldown exigent Node 22 ; sans ça le build casse sur une erreur
+  # qui ne parle pas de version (styleText absent de node:util).
+  NODE_VERSION = "22"
+
+# Le bundle et les assets sont hachés par Vite : on peut les garder au chaud
+# indéfiniment. L'index, lui, doit toujours être revalidé.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
