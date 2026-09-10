@@ -98,7 +98,8 @@ export const NIVEAUX = [
   {
     id: 'sk003',
     nom: 'VOL SK-003',
-    trajet: 'LA VENGEANCE EST UN PLAT QUI SE MANGE FROID',
+    trajet: ['LA VENGEANCE EST UN PLAT',
+    'QUI SE MANGE FROID'],
     histoire: [
       'DERNIERE ETAPE. DERNIERE MISSION',
       'LE GRAND RECITAL.',
@@ -134,6 +135,14 @@ export const NIVEAUX = [
     },
   },
 ];
+
+// Un trajet trop long tient sur plusieurs lignes : on l'écrit alors en tableau
+// dans les données. Les scènes reçoivent toujours un tableau et le disposent
+// comme elles veulent — jamais de concaténation directe, qui recollerait les
+// lignes avec une virgule.
+export function lignesTrajet(n) {
+  return Array.isArray(n.trajet) ? n.trajet : [n.trajet];
+}
 
 export function niveau(index) {
   return NIVEAUX[index] ?? NIVEAUX[0];

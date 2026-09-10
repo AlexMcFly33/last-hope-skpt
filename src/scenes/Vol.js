@@ -12,7 +12,7 @@ import {
   DEGATS_PAR_TIR,
 } from '../constantes.js';
 import { composer } from '../equipage.js';
-import { creerCiel } from '../ciel.js';
+import { creerCiel, ELAN_EN_VOL } from '../ciel.js';
 import { jouerMusique } from '../musique.js';
 import { niveau, positionsVague, bossTexture } from '../niveaux.js';
 import { typeEnnemi, ennemiTexture, vol } from '../ennemis.js';
@@ -139,7 +139,7 @@ export default class Vol extends Phaser.Scene {
   }
 
   create() {
-    this.ciel = creerCiel(this);
+    this.ciel = creerCiel(this, ELAN_EN_VOL);
     // Le jeu commence vraiment ici : l'intro se fond, le morceau de vol prend
     // le relais et tiendra jusqu'au retour en salle d'embarquement.
     jouerMusique(this, 'vol');

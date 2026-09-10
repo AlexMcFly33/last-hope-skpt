@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { LARGEUR, HAUTEUR, STYLE, STYLE_TITRE, TEXTE, RECORD } from '../constantes.js';
 import { composer } from '../equipage.js';
 import { creerCiel } from '../ciel.js';
-import { niveau } from '../niveaux.js';
+import { niveau, lignesTrajet } from '../niveaux.js';
 import { lire, ecrire } from '../stockage.js';
 
 const DELAI_DE_GARDE = 500;
@@ -40,17 +40,25 @@ export default class Fin extends Phaser.Scene {
         color: TEXTE.terne,
       })
       .setOrigin(0.5);
+    // En cas d'échec on rappelle le vol manqué, trajet compris — et il peut
+    // tenir sur plusieurs lignes, ce qui repousse le score d'autant.
+    const trajet = this.victoire ? [] : lignesTrajet(this.niveau);
     this.add
-      .text(
-        LARGEUR / 2,
-        172,
-        this.victoire ? 'TOUTE LA LIGNE' : `${this.niveau.nom} / ${this.niveau.trajet}`,
-        { ...STYLE, color: TEXTE.terne }
-      )
+      .text(LARGEUR / 2, 172, this.victoire ? 'TOUTE LA LIGNE' : this.niveau.nom, {
+        ...STYLE,
+        color: TEXTE.terne,
+      })
       .setOrigin(0.5);
-    this.add.text(LARGEUR / 2, 188, `${this.degats} DEGATS`, STYLE).setOrigin(0.5);
+    if (trajet.length > 0) {
+      this.add
+        .text(LARGEUR / 2, 182, trajet, { ...STYLE, color: TEXTE.terne, align: 'center' })
+        .setOrigin(0.5, 0);
+    }
+
+    const bas = 182 + trajet.length * 10;
+    this.add.text(LARGEUR / 2, bas + 8, `${this.degats} DEGATS`, STYLE).setOrigin(0.5);
     this.add
-      .text(LARGEUR / 2, 202, bat ? 'NOUVEAU RECORD' : `RECORD ${Math.max(record, this.degats)}`, {
+      .text(LARGEUR / 2, bas + 22, bat ? 'NOUVEAU RECORD' : `RECORD ${Math.max(record, this.degats)}`, {
         ...STYLE,
         color: bat ? TEXTE.accent : TEXTE.terne,
       })

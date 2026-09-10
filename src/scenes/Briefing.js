@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { LARGEUR, HAUTEUR, STYLE, STYLE_TITRE, TEXTE } from '../constantes.js';
 import { creerCiel } from '../ciel.js';
-import { niveau } from '../niveaux.js';
+import { niveau, lignesTrajet } from '../niveaux.js';
 
 const Y_PREMIERE_LIGNE = 118;
 const INTERLIGNE = 13;
@@ -30,7 +30,13 @@ export default class Briefing extends Phaser.Scene {
 
     this.add.text(LARGEUR / 2, 56, this.niveau.nom, STYLE_TITRE).setOrigin(0.5);
     this.add
-      .text(LARGEUR / 2, 78, this.niveau.trajet, { ...STYLE, color: TEXTE.accent })
+      // setOrigin centre le bloc, align centre les lignes à l'intérieur : sans
+      // les deux, un trajet sur deux lignes reste ferré à gauche.
+      .text(LARGEUR / 2, 78, lignesTrajet(this.niveau), {
+        ...STYLE,
+        color: TEXTE.accent,
+        align: 'center',
+      })
       .setOrigin(0.5);
 
     // Une ligne vide sert de respiration : on la garde dans le compte pour que

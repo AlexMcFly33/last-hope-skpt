@@ -1,13 +1,16 @@
 import Phaser from 'phaser';
 import { LARGEUR, HAUTEUR, STYLE, STYLE_TITRE, TEXTE } from '../constantes.js';
 import { creerCiel } from '../ciel.js';
-import { niveau, estDernier } from '../niveaux.js';
+import { niveau, estDernier, lignesTrajet } from '../niveaux.js';
 import { BONUS, bonusTexture } from '../bonus.js';
 
-const Y_TRAJET = 52;
-const Y_DEGATS = 84;
-const Y_TOTAL = 98;
-const Y_TITRE_RAMASSE = 128;
+const Y_NOM = 50;
+const INTERLIGNE_TRAJET = 11;
+// Écarts sous l'en-tête, dont la hauteur dépend du nombre de lignes du trajet.
+const ECART_ABATTU = 6;
+const ECART_DEGATS = 20;
+const ECART_TOTAL = 14;
+const ECART_TITRE_RAMASSE = 26;
 const Y_PREMIER_ITEM = 150;
 const INTERLIGNE = 22;
 const X_ICONE = 44;
@@ -37,20 +40,43 @@ export default class Escale extends Phaser.Scene {
 
     this.add.text(LARGEUR / 2, 26, 'ESCALE', STYLE_TITRE).setOrigin(0.5);
     this.add
-      .text(LARGEUR / 2, Y_TRAJET, `${this.niveau.nom}  ${this.niveau.trajet}`, {
+      .text(LARGEUR / 2, Y_NOM, this.niveau.nom, { ...STYLE, color: TEXTE.accent })
+      .setOrigin(0.5);
+
+    // Le trajet sous le nom plutôt qu'à sa suite : sur une seule ligne, un long
+    // trajet déborderait de l'écran.
+    const trajet = lignesTrajet(this.niveau);
+    this.add
+      .text(LARGEUR / 2, Y_NOM + INTERLIGNE_TRAJET, trajet, {
+        ...STYLE,
+        color: TEXTE.accent,
+        align: 'center',
+      })
+      .setOrigin(0.5, 0);
+
+    // Tout ce qui suit descend d'autant que le trajet occupe de lignes.
+    const bas = Y_NOM + INTERLIGNE_TRAJET + trajet.length * INTERLIGNE_TRAJET;
+
+    this.add
+      .text(LARGEUR / 2, bas + ECART_ABATTU, 'APPAREIL ADVERSE ABATTU', {
+        ...STYLE,
+        color: TEXTE.terne,
+      })
+      .setOrigin(0.5);
+
+    this.ligne(bas + ECART_DEGATS, 'DEGATS DE CE VOL', this.degatsDuVol, TEXTE.clair);
+    this.ligne(
+      bas + ECART_DEGATS + ECART_TOTAL,
+      'TOTAL DEPUIS LE DECOLLAGE',
+      this.bagages.degats ?? 0,
+      TEXTE.terne
+    );
+
+    this.add
+      .text(LARGEUR / 2, bas + ECART_DEGATS + ECART_TOTAL + ECART_TITRE_RAMASSE, 'RAMASSE EN CHEMIN', {
         ...STYLE,
         color: TEXTE.accent,
       })
-      .setOrigin(0.5);
-    this.add
-      .text(LARGEUR / 2, Y_TRAJET + 12, 'APPAREIL ADVERSE ABATTU', { ...STYLE, color: TEXTE.terne })
-      .setOrigin(0.5);
-
-    this.ligne(Y_DEGATS, 'DEGATS DE CE VOL', this.degatsDuVol, TEXTE.clair);
-    this.ligne(Y_TOTAL, 'TOTAL DEPUIS LE DECOLLAGE', this.bagages.degats ?? 0, TEXTE.terne);
-
-    this.add
-      .text(LARGEUR / 2, Y_TITRE_RAMASSE, 'RAMASSE EN CHEMIN', { ...STYLE, color: TEXTE.accent })
       .setOrigin(0.5);
 
     BONUS.forEach((bonus, i) => {
