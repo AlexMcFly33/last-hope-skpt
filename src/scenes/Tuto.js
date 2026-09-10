@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { LARGEUR, HAUTEUR, STYLE, STYLE_TITRE, TEXTE } from '../constantes.js';
 import { creerCiel } from '../ciel.js';
 import { BONUS, bonusTexture } from '../bonus.js';
+import { creerBoutonSourdine } from '../sourdine.js';
 
 const Y_COMMANDES = 58;
 const Y_LEGENDE = 122;
@@ -62,13 +63,6 @@ export default class Tuto extends Phaser.Scene {
       this.add.text(X_TEXTE, y + 6, bonus.effet, { ...STYLE, color: TEXTE.terne });
     });
 
-    this.add
-      .text(LARGEUR / 2, HAUTEUR - 44, 'TOUT NE SE RAMASSE PAS : REGARDEZ AVANT', {
-        ...STYLE,
-        color: TEXTE.terne,
-      })
-      .setOrigin(0.5);
-
     const invite = this.add
       .text(LARGEUR / 2, HAUTEUR - 26, 'ESPACE : REJOINDRE L APPAREIL', STYLE)
       .setOrigin(0.5);
@@ -81,6 +75,10 @@ export default class Tuto extends Phaser.Scene {
     this.input.keyboard.on('keydown-ENTER', () => this.passer());
     this.input.keyboard.on('keydown-ESC', () => this.scene.start('Selection'));
     this.input.on('pointerdown', () => this.passer());
+
+    // Coin haut droit, à l'écart de tout ce que la scène dessine.
+    creerBoutonSourdine(this, LARGEUR - 14, 14);
+
   }
 
   update(temps, delta) {

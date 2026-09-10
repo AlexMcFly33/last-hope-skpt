@@ -5,6 +5,8 @@ import { APPAREILS, livree } from '../appareils.js';
 import { composer } from '../equipage.js';
 import { creerCiel } from '../ciel.js';
 import { caler } from '../cadrage.js';
+import { creerBoutonSourdine } from '../sourdine.js';
+import { jouerMusique } from '../musique.js';
 
 const JAUGE_MAX = 5;
 const LARGEUR_SEGMENT = 8;
@@ -32,6 +34,8 @@ export default class Selection extends Phaser.Scene {
 
   create() {
     this.ciel = creerCiel(this);
+    // Revenir ici après un vol doit ramener le morceau d'intro.
+    jouerMusique(this, 'intro');
     this.etape = 0;
     this.choixPilote = 0;
     this.choixAppareil = 0;
@@ -68,6 +72,10 @@ export default class Selection extends Phaser.Scene {
     this.input.keyboard.on('keydown-ESC', () => this.reculer());
     this.input.keyboard.on('keydown-BACKSPACE', () => this.reculer());
     this.input.on('pointerdown', (souris) => this.deplacer(souris.x > LARGEUR / 2 ? 1 : -1));
+
+    // Coin haut droit, à l'écart de tout ce que la scène dessine.
+    creerBoutonSourdine(this, LARGEUR - 14, 14);
+
 
     this.afficher();
   }

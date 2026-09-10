@@ -6,6 +6,7 @@ import Selection from './scenes/Selection.js';
 import Tuto from './scenes/Tuto.js';
 import Briefing from './scenes/Briefing.js';
 import Vol from './scenes/Vol.js';
+import Escale from './scenes/Escale.js';
 import Fin from './scenes/Fin.js';
 
 new Phaser.Game({
@@ -23,5 +24,5 @@ new Phaser.Game({
     default: 'arcade',
     arcade: { debug: false },
   },
-  scene: [Preload, Menu, Selection, Tuto, Briefing, Vol, Fin],
+  scene: [Preload, Menu, Selection, Tuto, Briefing, Vol, Escale, Fin],
 });

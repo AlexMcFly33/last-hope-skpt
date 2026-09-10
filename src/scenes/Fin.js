@@ -3,6 +3,7 @@ import { LARGEUR, HAUTEUR, STYLE, STYLE_TITRE, TEXTE, RECORD } from '../constant
 import { composer } from '../equipage.js';
 import { creerCiel } from '../ciel.js';
 import { niveau } from '../niveaux.js';
+import { lire, ecrire } from '../stockage.js';
 
 const DELAI_DE_GARDE = 500;
 
@@ -25,9 +26,9 @@ export default class Fin extends Phaser.Scene {
     // délai laisse le temps de lire l'écran avant qu'elle ne le referme.
     this.ouvertA = this.time.now;
 
-    const record = Number(localStorage.getItem(RECORD) ?? 0);
+    const record = Number(lire(RECORD, 0));
     const bat = this.degats > record;
-    if (bat) localStorage.setItem(RECORD, String(this.degats));
+    if (bat) ecrire(RECORD, this.degats);
 
     this.add
       .text(LARGEUR / 2, 96, this.victoire ? 'LIGNE REPRISE' : 'VOL ANNULE', STYLE_TITRE)

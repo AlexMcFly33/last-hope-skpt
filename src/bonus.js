@@ -13,7 +13,7 @@ export const CHANCE_LARGAGE = 0.26;
 export const BONUS = [
   {
     id: 'vie',
-    libelle: 'EQUIPAGE FRAIS',
+    libelle: 'MENTHE PASTILLE',
     effet: 'UNE VIE DE PLUS',
     poids: 1,
     malus: false,
@@ -26,8 +26,8 @@ export const BONUS = [
     malus: false,
   },
   {
-    id: 'givre',
-    libelle: 'GIVRE SUR LES AILES',
+    id: 'enduit',
+    libelle: 'SAC D ENDUIT',
     effet: 'ALOURDI ET RALENTI 6S',
     poids: 4,
     malus: true,
@@ -41,12 +41,12 @@ export const BONUS = [
   },
 ];
 
-// Le givre ne coûte pas de vie : il alourdit l'appareil. La cadence tombe,
-// mais c'est surtout l'appareil qui se traîne — c'est ce qu'on sent d'abord
-// aux commandes, et ce qui rend le malus lisible sans être injouable.
-export const DUREE_GIVRE = 6000;
-export const FACTEUR_GIVRE_CADENCE = 2;
-export const FACTEUR_GIVRE_VITESSE = 0.55;
+// Le sac d'enduit ne coûte pas de vie : il alourdit l'appareil. La cadence
+// tombe, mais c'est surtout l'appareil qui se traîne — c'est ce qu'on sent
+// d'abord aux commandes, et ce qui rend le malus lisible sans être injouable.
+export const DUREE_ENDUIT = 6000;
+export const FACTEUR_ENDUIT_CADENCE = 2;
+export const FACTEUR_ENDUIT_VITESSE = 0.55;
 
 // L'échelle d'armement, du plus simple au plus fourni. Les canons sont des
 // décalages en x par rapport au nez de l'appareil : un cran de plus, un tir de

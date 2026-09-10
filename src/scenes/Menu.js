@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import { LARGEUR, HAUTEUR, STYLE, STYLE_TITRE, TEXTE, RECORD } from '../constantes.js';
 import { creerCiel } from '../ciel.js';
 import { caler } from '../cadrage.js';
+import { lire } from '../stockage.js';
+import { jouerMusique } from '../musique.js';
 
 // Le logo tient dans une case fixe : qu'il vienne du pochoir 32x11 ou d'un PNG
 // maison, il occupe la même place sous le sous-titre.
@@ -40,7 +42,7 @@ export default class Menu extends Phaser.Scene {
       repeat: -1,
     });
 
-    const record = Number(localStorage.getItem(RECORD) ?? 0);
+    const record = Number(lire(RECORD, 0));
     if (record > 0) {
       this.add
         .text(LARGEUR / 2, HAUTEUR - 24, `RECORD ${record} DEGATS`, {
@@ -65,9 +67,7 @@ export default class Menu extends Phaser.Scene {
     this.decolle = true;
 
     if (this.sound.locked) this.sound.unlock();
-    if (this.cache.audio.exists('musique') && !this.sound.get('musique')) {
-      this.sound.play('musique', { loop: true, volume: 0.4 });
-    }
+    jouerMusique(this, 'intro');
 
     this.scene.start('Selection');
   }

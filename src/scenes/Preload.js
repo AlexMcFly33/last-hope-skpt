@@ -6,10 +6,13 @@ import { NIVEAUX, bossTexture } from '../niveaux.js';
 import { ENNEMIS, ennemiTexture } from '../ennemis.js';
 import { BONUS, bonusTexture } from '../bonus.js';
 import { fabriquerSons } from '../sons.js';
+import { appliquerSourdine } from '../sourdine.js';
+import { chargerMusiques, oublierMusique } from '../musique.js';
 
 // Les sprites sont peints en code en attendant de vrais PNG. Les clés générées
 // ici (portrait_<pilote>, avion_<appareil>_<pilote>, ennemi_<type>, boss_<boss>,
-// bonus_<bonus>, logo, tir_joueur, tir_ennemi, etoile) sont le contrat avec le
+// bonus_<bonus>, logo, son_actif, son_coupe, tir_joueur, tir_ennemi, etoile)
+// sont le contrat avec le
 // reste du jeu : le jour où les assets arrivent, seul ce fichier change. Les
 // bruitages suivent le même principe, voir sons.js.
 
@@ -254,6 +257,39 @@ const TIR_JOUEUR = ['.T.', 'TTT', 'TTT', 'TTT', '.T.'];
 
 const TIR_ENNEMI = ['.T.', 'TTT', '.T.'];
 
+// Le bouton de sourdine, en deux états. À douze pixels de côté le détail est
+// un luxe : un pavillon trapu, et des ondes qu'on remplace par une croix.
+const HAUT_PARLEUR = {
+  son_actif: [
+    '............',
+    '.......S....',
+    '......SS.W..',
+    '..SSSSSS..W.',
+    '..SSSSSS.W.W',
+    '..SSSSSS.W.W',
+    '..SSSSSS.W.W',
+    '..SSSSSS.W.W',
+    '..SSSSSS..W.',
+    '......SS.W..',
+    '.......S....',
+    '............',
+  ],
+  son_coupe: [
+    '............',
+    '.......S....',
+    '......SS....',
+    '..SSSSSS....',
+    '..SSSSSS....',
+    '..SSSSSS.X.X',
+    '..SSSSSS..X.',
+    '..SSSSSS.X.X',
+    '..SSSSSS....',
+    '......SS....',
+    '.......S....',
+    '............',
+  ],
+};
+
 // Un boss par vol. Deux fois plus large qu'un ennemi ordinaire : sa carrure se
 // voit avant sa jauge de coque. Même palette que les silhouettes (C, O, H),
 // mais aux couleurs de la concurrence.
@@ -334,8 +370,8 @@ const BOSS = {
 };
 
 // Les bonus se lisent à la forme avant la couleur : une croix soigne, une
-// flèche arme, un flocon givre les ailes, une croix de Saint-André met un
-// canon hors service.
+// flèche arme, un sac d'enduit lesté alourdit l'appareil, une croix de
+// Saint-André met un canon hors service.
 const BONUS_MOTIFS = {
   vie: [
     '...BBB...',
@@ -359,16 +395,19 @@ const BONUS_MOTIFS = {
     '...BBB...',
     '...BBB...',
   ],
-  givre: [
-    '....B....',
-    'B..BBB..B',
-    '.B.BBB.B.',
-    '..BBBBB..',
-    'BBBBBBBBB',
-    '..BBBBB..',
-    '.B.BBB.B.',
-    'B..BBB..B',
-    '....B....',
+  // Un sac de chantier : un rectangle beige, rabats plus sombres en haut et en
+  // bas. Debout plutôt que carré, pour ne pas le confondre avec les autres.
+  enduit: [
+    '.........',
+    '.OOOOOOO.',
+    '.BBBBBBB.',
+    '.BBBBBBB.',
+    '.BBBBBBB.',
+    '.BBBBBBB.',
+    '.BBBBBBB.',
+    '.BBBBBBB.',
+    '.OOOOOOO.',
+    '.........',
   ],
   panne: [
     'BB.....BB',
@@ -406,7 +445,7 @@ export default class Preload extends Phaser.Scene {
 
   preload() {
     this.embarquement();
-    this.load.audio('musique', 'audio/musique.wav');
+    chargerMusiques(this);
 
     // Un pilote marqué photo: true attend son PNG dans public/portraits/.
     // On ne demande que ceux-là : réclamer les autres ferait des 404 inutiles.
@@ -495,6 +534,17 @@ export default class Preload extends Phaser.Scene {
     this.peindre('tir_ennemi', TIR_ENNEMI, { T: COULEURS.tirEnnemi });
     this.peindre('etoile', ['E'], { E: COULEURS.etoile });
 
+    // Coupé, le haut-parleur s'éteint aussi visuellement : le dessin passe en
+    // terne, seule la croix reste vive.
+    this.peindre('son_actif', HAUT_PARLEUR.son_actif, {
+      S: COULEURS.col,
+      W: COULEURS.hublot,
+    });
+    this.peindre('son_coupe', HAUT_PARLEUR.son_coupe, {
+      S: COULEURS.jauge,
+      X: COULEURS.perte,
+    });
+
     NIVEAUX.forEach((n) => {
       this.peindre(bossTexture(n), BOSS[n.boss.id], {
         C: COULEURS.boss,
@@ -506,11 +556,16 @@ export default class Preload extends Phaser.Scene {
     const TEINTES = {
       vie: COULEURS.bonusVie,
       arme: COULEURS.bonusArme,
-      givre: COULEURS.bonusGivre,
+      enduit: COULEURS.bonusEnduit,
       panne: COULEURS.bonusPanne,
     };
+    // O n'est utilisé que par le sac d'enduit ; le passer à tous ne coûte rien,
+    // un caractère absent d'un pochoir est simplement ignoré.
     BONUS.forEach((b) =>
-      this.peindre(bonusTexture(b.id), BONUS_MOTIFS[b.id], { B: TEINTES[b.id] })
+      this.peindre(bonusTexture(b.id), BONUS_MOTIFS[b.id], {
+        B: TEINTES[b.id],
+        O: COULEURS.bonusEnduitOmbre,
+      })
     );
 
     // Comme pour les portraits : un fichier déjà chargé occupe la clé, le
@@ -526,6 +581,11 @@ export default class Preload extends Phaser.Scene {
     // Même principe que les pochoirs : fabriqués une fois ici, déposés dans le
     // cache, joués ensuite comme n'importe quel son chargé depuis un fichier.
     fabriquerSons(this);
+    // Le réglage retenu vaut dès le menu, avant qu'aucun bouton n'existe.
+    appliquerSourdine(this);
+    // La page vient d'être (re)chargée : aucun morceau ne tourne, quoi qu'en
+    // pense le module après un rechargement à chaud.
+    oublierMusique();
 
     this.scene.start('Menu');
   }

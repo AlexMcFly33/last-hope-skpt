@@ -28,16 +28,16 @@ export const NIVEAUX = [
   {
     id: 'sk001',
     nom: 'VOL SK-001',
-    trajet: 'ORLY - DAKAR',
+    trajet: 'TABOULE VERS LE HAUT',
     histoire: [
-      'LA SKAPITAINES AIRLINES A PERDU',
-      'SA DERNIERE LIGNE REGULIERE.',
+      'LA SKAPITAINES COMPANY EST APPELLEE ',
+      'POUR UNE MISSION IMPORTANTE.',
       '',
-      'LES COMPAGNIES RIVALES SE PARTAGENT',
-      'NOS CRENEAUX DEPUIS SIX MOIS.',
+      'UNE ASSIETTE DE TABOULE N EST PAS VERS LE HAUT',
+      'VOUS DEVEZ INTERVENIR.',
       '',
-      'ON REPREND LE COULOIR DU SUD.',
-      'EN JOUANT FORT, SI POSSIBLE.',
+      'IL FAUT RETROUVER LE COUPABLE',
+      'ET DETRUIRE SON VAISSEAU.',
     ],
     ennemi: 'chasseur',
     vagues: [
@@ -50,7 +50,7 @@ export const NIVEAUX = [
     // Large et lent : il arrose devant lui sans viser. On le déborde par le côté.
     boss: {
       id: 'charter',
-      nom: 'LE CHARTER',
+      nom: 'SIMON BARON',
       pv: 90,
       cadence: 1100,
       vitesse: 45,
@@ -62,16 +62,16 @@ export const NIVEAUX = [
   {
     id: 'sk002',
     nom: 'VOL SK-002',
-    trajet: 'DAKAR - RECIFE',
+    trajet: 'LE REVEIL DE JEJE',
     histoire: [
-      'LE CHARTER EST TOMBE DANS LA MER.',
-      'SA COMPAGNIE A PREVENU LES AUTRES.',
+      'ON A RECU UN SOS DES FLOTS BLEUS.',
+      'JEJE EST INTROUVABLE.',
       '',
-      'HUIT HEURES AU DESSUS DE L ATLANTIQUE,',
-      'SANS TERRAIN DE DEGAGEMENT.',
+      'IL AURAIT EMBARQUE EN DIRECTION DU SHOGUN',
+      'MAIS IL N EST PLUS LE BIENVENU LA BAS.',
       '',
-      'RADIO DE BORD : CUIVRES A FOND.',
-      'ILS NOUS ENTENDRONT ARRIVER.',
+      'IL FAUT L INTERCEPTER.',
+      'VITE.',
     ],
     ennemi: 'guepe',
     vagues: [
@@ -86,7 +86,7 @@ export const NIVEAUX = [
     // sous lui ne pardonne pas, il faut bouger en continu.
     boss: {
       id: 'supersonique',
-      nom: 'LE SUPERSONIQUE',
+      nom: 'LE VAISSEAU TENTE DE JEJE',
       pv: 120,
       cadence: 800,
       vitesse: 120,
@@ -98,16 +98,16 @@ export const NIVEAUX = [
   {
     id: 'sk003',
     nom: 'VOL SK-003',
-    trajet: 'RECIFE - KINGSTON',
+    trajet: 'LA VENGEANCE EST UN PLAT QUI SE MANGE FROID',
     histoire: [
-      'DERNIERE ETAPE. KINGSTON NOUS ATTEND',
-      'AVEC UNE SALLE ET UNE BALANCE.',
+      'DERNIERE ETAPE. DERNIERE MISSION',
+      'LE GRAND RECITAL.',
       '',
-      'EN FACE : L AMIRAL, LE VAISSEAU',
-      'DE TETE DE TOUTE LA CONCURRENCE.',
+      'EN FACE : LE TRUBLION ET AMUSEUR PUBLIC',
+      'ENNEMI JURE DE LA SKAPITAINE COMPANY.',
       '',
       'PAS DE PLAN DE VOL, PAS DE FILET.',
-      'JUSTE LE PREMIER MORCEAU.',
+      'IL FAUT LE DETRUIRE.',
     ],
     ennemi: 'plongeur',
     vagues: [
@@ -123,7 +123,7 @@ export const NIVEAUX = [
     // jamais seul à seul.
     boss: {
       id: 'amiral',
-      nom: 'L AMIRAL',
+      nom: 'PHILIPPE MAINDRON',
       pv: 160,
       cadence: 750,
       vitesse: 55,

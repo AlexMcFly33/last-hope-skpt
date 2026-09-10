@@ -21,7 +21,9 @@ export const COULEURS = {
   // en 9x9 pixels, la teinte seule ne suffit pas à les distinguer.
   bonusVie: 0x6fd08c,
   bonusArme: 0xf7d51d,
-  bonusGivre: 0x7fc8ff,
+  // Beige de sac de chantier, et sa teinte d'ombre pour les rabats.
+  bonusEnduit: 0xd8c9a3,
+  bonusEnduitOmbre: 0xa8946b,
   bonusPanne: 0xc94f7c,
   // Boss de fin de vol et sa jauge de coque.
   boss: 0x8f4fd9,

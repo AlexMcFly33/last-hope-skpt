@@ -79,6 +79,15 @@ vol ne demande que son entrée ici et le pochoir de son boss dans `Preload.js`.
 le briefing du premier vol. Elle construit sa légende depuis `bonus.js` :
 ajouter un item là-bas le fait apparaître ici sans toucher la scène.
 
+**La scène `Escale` fait les comptes entre deux vols.** `Vol` y passe la main
+après le boss ; elle affiche les dégâts du vol qu'on vient de faire, le total
+depuis le décollage et ce qui a été ramassé en chemin, puis enchaîne sur le
+briefing suivant — ou sur `Fin` si c'était le dernier vol. C'est elle qui
+décide, pas `Vol` : la scène de vol ne sait plus si elle était la dernière.
+Deux compteurs de `Vol` ne servent qu'à ça et repartent de zéro à chaque
+décollage : `degatsDuVol` et `ramassages`, là où le score cumulé traverse les
+escales. La liste des items se construit depuis `bonus.js`.
+
 **La scène `Briefing` précède toujours un vol.** On n'entre jamais dans `Vol`
 directement : `Selection` et `Fin` passent par elle, elle transmet les bagages
 (équipage, miles, vies, armement) à la scène de vol. Le texte est révélé ligne
@@ -128,10 +137,36 @@ suivante. Son entrée en scène est donc pilotée depuis `update`.
 
 **La musique ne démarre que dans `Menu.decoller()`**, déclenché par une
 touche ou un clic. Les navigateurs bloquent toute lecture sans geste
-utilisateur. C'est le seul point d'entrée valide pour la musique. Le fichier
-lui-même est chargé en amont par `Preload` depuis `public/audio/`, et pèse
+utilisateur. C'est le seul point d'entrée valide pour le premier morceau. Les
+fichiers sont chargés en amont par `Preload` depuis `public/audio/`, et pèsent
 assez lourd pour justifier la jauge d'embarquement. Les bruitages, eux, ne se
 jouent qu'en vol, donc bien après ce geste : ils n'ont pas cette contrainte.
+
+**Les morceaux et leur enchaînement vivent dans `src/musique.js`**, pas dans
+les scènes : le gestionnaire de son de Phaser est global, la musique ne
+s'arrête pas à un changement de scène, donc c'est au module de retenir ce qui
+tourne. `jouerMusique(scene, nom)` fait le fondu croisé et ne fait rien si le
+morceau demandé tourne déjà — une scène peut donc l'appeler à chaque création
+sans savoir d'où vient le joueur. L'intro accompagne tout l'avant-vol,
+`Vol.create()` bascule sur le morceau de niveau. Un morceau marqué
+`presente: false` n'est pas réclamé au chargement (même principe que
+`LOGO_IMPORTE`) et son absence fait simplement silence : le fondu de sortie du
+précédent a quand même lieu.
+
+**Jamais de `localStorage` en direct : tout passe par `src/stockage.js`.** Un
+navigateur peut refuser le stockage — navigation privée, cookies bloqués,
+iframe restreinte — et l'accès jette alors dès la lecture de la propriété.
+`Menu.create()` le lisait sans protection : le jeu restait noir, sans message.
+`lire` et `ecrire` avalent l'exception ; sans stockage la partie tourne
+normalement, elle oublie juste le record et le réglage du son.
+
+**Le bouton de sourdine est partagé** (`src/sourdine.js`) et posé sur
+`Selection` et `Tuto`. Deux points non évidents : son état vit en mémoire et
+n'est *que* sauvegardé dans le stockage — sinon un navigateur qui le refuse
+rendrait le bouton inerte, basculant le son sans jamais changer d'apparence —
+et son gestionnaire appelle `evenement.stopPropagation()`, sans quoi le clic
+continue jusqu'au `input.on('pointerdown')` de la scène, qui l'entend comme
+« changer de pilote » ou « passer le tuto ».
 
 **Les bruitages sont synthétisés en code** dans `src/sons.js`, comme les
 sprites le sont dans `Preload.js` : une recette par son, rendue en tampon

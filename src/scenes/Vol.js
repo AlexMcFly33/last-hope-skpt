@@ -13,16 +13,17 @@ import {
 } from '../constantes.js';
 import { composer } from '../equipage.js';
 import { creerCiel } from '../ciel.js';
-import { niveau, estDernier, positionsVague, bossTexture } from '../niveaux.js';
+import { jouerMusique } from '../musique.js';
+import { niveau, positionsVague, bossTexture } from '../niveaux.js';
 import { typeEnnemi, ennemiTexture, vol } from '../ennemis.js';
 import { sonDuTir } from '../sons.js';
 import {
   ARMES,
   CHANCE_LARGAGE,
   estMalus,
-  DUREE_GIVRE,
-  FACTEUR_GIVRE_CADENCE,
-  FACTEUR_GIVRE_VITESSE,
+  DUREE_ENDUIT,
+  FACTEUR_ENDUIT_CADENCE,
+  FACTEUR_ENDUIT_VITESSE,
   bonusTexture,
   libelleBonus,
   tirerBonus,
@@ -122,9 +123,14 @@ export default class Vol extends Phaser.Scene {
     this.viesRestantes = donnees?.vies ?? VIES_DEPART;
     this.arme = donnees?.arme ?? 0;
 
+    // Le score cumulé traverse les escales, mais l'escale rend compte du vol
+    // qu'on vient de faire : ces deux-là repartent de zéro à chaque décollage.
+    this.degatsDuVol = 0;
+    this.ramassages = {};
+
     this.dernierTir = 0;
     this.finDuRepit = 0;
-    this.finDuGivre = 0;
+    this.finDeLEnduit = 0;
     this.indexVague = 0;
     this.boss = null;
     this.bossEnPlace = false;
@@ -134,6 +140,9 @@ export default class Vol extends Phaser.Scene {
 
   create() {
     this.ciel = creerCiel(this);
+    // Le jeu commence vraiment ici : l'intro se fond, le morceau de vol prend
+    // le relais et tiendra jusqu'au retour en salle d'embarquement.
+    jouerMusique(this, 'vol');
 
     this.joueur = this.physics.add
       .sprite(LARGEUR / 2, HAUTEUR - 48, this.equipage.texture)
@@ -344,6 +353,7 @@ export default class Vol extends Phaser.Scene {
     remiser(tir);
     boss.pv -= DEGATS_PAR_TIR;
     this.degats += DEGATS_PAR_TIR;
+    this.degatsDuVol += DEGATS_PAR_TIR;
     this.rafraichirJaugeBoss();
     this.rafraichirTableauDeBord();
 
@@ -379,15 +389,14 @@ export default class Vol extends Phaser.Scene {
     this.rafraichirTableauDeBord();
     this.annoncer('APPAREIL ADVERSE ABATTU');
 
-    // Une escale avant le vol suivant : on repasse par le briefing, qui reçoit
-    // les bagages et les fera suivre à Vol.
-    this.time.delayedCall(1600, () => {
-      if (estDernier(this.indexNiveau)) {
-        this.scene.start('Fin', { ...this.bagages(), victoire: true });
-        return;
-      }
-      this.scene.start('Briefing', { ...this.bagages(), niveau: this.indexNiveau + 1 });
-    });
+    // On passe la main à l'escale, qui fait les comptes du vol et enchaîne.
+    this.time.delayedCall(1600, () =>
+      this.scene.start('Escale', {
+        ...this.bagages(),
+        degatsDuVol: this.degatsDuVol,
+        ramassages: this.ramassages,
+      })
+    );
   }
 
   // Ce qu'un vol transmet au suivant.
@@ -436,7 +445,7 @@ export default class Vol extends Phaser.Scene {
   // plus faible : verrouillés, givrés, ou simplement au cran courant.
   etatDesCanons() {
     if (this.canonsVerrouilles()) return ['CANONS VERROUILLES', TEXTE.alerte];
-    if (this.givre()) return [`CANONS ${this.arme + 1} GIVRES`, TEXTE.accent];
+    if (this.alourdi()) return [`CANONS ${this.arme + 1} ALOURDIS`, TEXTE.accent];
     return [`CANONS ${this.arme + 1}`, TEXTE.terne];
   }
 
@@ -465,8 +474,8 @@ export default class Vol extends Phaser.Scene {
     if (this.cache.audio.exists(cle)) this.sound.play(cle);
   }
 
-  givre() {
-    return this.time.now < this.finDuGivre;
+  alourdi() {
+    return this.time.now < this.finDeLEnduit;
   }
 
   // On ne mitraille pas un adversaire qui descend encore. Les tirs déjà en
@@ -487,15 +496,15 @@ export default class Vol extends Phaser.Scene {
     const vx = (droite.isDown ? 1 : 0) - (gauche.isDown ? 1 : 0);
     const vy = (bas.isDown ? 1 : 0) - (haut.isDown ? 1 : 0);
 
-    // Givré, l'appareil se traîne : c'est le premier symptôme qu'on sent.
-    const givre = this.givre();
-    const vitesse = givre ? this.vitesse * FACTEUR_GIVRE_VITESSE : this.vitesse;
+    // Lesté, l'appareil se traîne : c'est le premier symptôme qu'on sent.
+    const alourdi = this.alourdi();
+    const vitesse = alourdi ? this.vitesse * FACTEUR_ENDUIT_VITESSE : this.vitesse;
 
     this.joueur.setVelocity(vx * vitesse, vy * vitesse);
     // Une diagonale ne doit pas aller plus vite qu'une ligne droite.
     if (vx !== 0 && vy !== 0) this.joueur.body.velocity.scale(Math.SQRT1_2);
 
-    const cadence = givre ? this.cadence * FACTEUR_GIVRE_CADENCE : this.cadence;
+    const cadence = alourdi ? this.cadence * FACTEUR_ENDUIT_CADENCE : this.cadence;
     if (feu.isDown && !this.canonsVerrouilles() && temps - this.dernierTir >= cadence) {
       this.dernierTir = temps;
       this.tirer();
@@ -547,6 +556,7 @@ export default class Vol extends Phaser.Scene {
     remiser(tir);
     ennemi.pv -= DEGATS_PAR_TIR;
     this.degats += DEGATS_PAR_TIR;
+    this.degatsDuVol += DEGATS_PAR_TIR;
 
     if (ennemi.pv <= 0) {
       this.son('explosion');
@@ -580,19 +590,20 @@ export default class Vol extends Phaser.Scene {
   ramasser(joueur, objet) {
     const id = objet.getData('bonus');
     objet.destroy();
+    this.ramassages[id] = (this.ramassages[id] ?? 0) + 1;
 
     if (id === 'vie') {
       this.viesRestantes = Math.min(VIES_MAX, this.viesRestantes + 1);
     } else if (id === 'arme') {
       this.arme = Math.min(ARMES.length - 1, this.arme + 1);
-    } else if (id === 'givre') {
-      this.finDuGivre = this.time.now + DUREE_GIVRE;
-      this.joueur.setTint(COULEURS.bonusGivre);
+    } else if (id === 'enduit') {
+      this.finDeLEnduit = this.time.now + DUREE_ENDUIT;
+      this.joueur.setTint(COULEURS.bonusEnduit);
       // Le tableau de bord ne se rafraîchit que sur événement : il faut donc
-      // le rappeler au dégel. Le test protège du cas où un second givre a été
-      // ramassé entre-temps : c'est à son propre dégel de rendre la livrée.
-      this.time.delayedCall(DUREE_GIVRE, () => {
-        if (!this.givre()) this.joueur.clearTint();
+      // le rappeler à la fin. Le test protège du cas où un second sac a été
+      // ramassé entre-temps : c'est au sien de rendre la livrée.
+      this.time.delayedCall(DUREE_ENDUIT, () => {
+        if (!this.alourdi()) this.joueur.clearTint();
         this.rafraichirTableauDeBord();
       });
     } else if (id === 'panne') {
